@@ -83,6 +83,19 @@ fun String.mapToCategoryIcon(icons: TimePlannerIcons): Int? = when (this) {
     "hygiene" -> icons.categoryHygiene
     "health" -> icons.categoryHealth
     "shopping" -> icons.categoryShopping
+    "projects" -> icons.categoryCustomIconRocket
+    "pets" -> icons.categoryCustomIconPets
+    "call" -> icons.categoryCustomIconCall
+    "meditate" -> icons.categoryCustomIconMeditate
+    "people" -> icons.categoryCustomIconGroup
+    "code" -> icons.categoryCustomIconCode
+    "growth" -> icons.categoryCustomIconGrowth
+    "event" -> icons.categoryCustomIconEvent
+    "read" -> icons.categoryCustomIconBook
+    "person" -> icons.categoryCustomIconUser
+    "hiking" -> icons.categoryCustomIconHiking
+    "art" -> icons.categoryCustomIconArt
+    "music" -> icons.categoryCustomIconMusic
     else -> null
 }
 
@@ -115,4 +128,17 @@ fun fetchMainCategoryIconKeys() = listOf(
     "hygiene",
     "health",
     "shopping",
+    "projects",
+    "pets",
+    "call",
+    "meditate",
+    "people",
+    "code",
+    "growth",
+    "event",
+    "read",
+    "person",
+    "hiking",
+    "art",
+    "music",
 )
