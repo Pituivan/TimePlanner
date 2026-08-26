@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.aleshin.core.domain.entities.tasks.TaskPriority
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.tasks.UndefinedTaskUi
 import ru.aleshin.features.overview.impl.presentation.mapppers.mapToString
 import ru.aleshin.features.overview.impl.presentation.theme.OverviewThemeRes
@@ -130,7 +130,10 @@ private fun UndefinedTaskItemContent(
         }
     } ?: OverviewThemeRes.strings.noDeadlineTitle
     val categoryColors = fetchOverviewCategoryColors(model.mainCategory.id)
-    val defaultCategoryType = model.mainCategory.defaultType
+    val categoryIcon = resolveMainCategoryIconPainter(
+        customIconKey = model.mainCategory.customIconKey,
+        defaultType = model.mainCategory.defaultType,
+    )
 
     Row(
         modifier = Modifier
@@ -150,10 +153,10 @@ private fun UndefinedTaskItemContent(
                 .background(categoryColors.container),
             contentAlignment = Alignment.Center,
         ) {
-            if (defaultCategoryType != null) {
+            if (categoryIcon != null) {
                 Icon(
                     modifier = Modifier.size(26.dp),
-                    painter = defaultCategoryType.mapToIconPainter(),
+                    painter = categoryIcon,
                     contentDescription = categoryContentDescription,
                     tint = categoryColors.accent,
                 )

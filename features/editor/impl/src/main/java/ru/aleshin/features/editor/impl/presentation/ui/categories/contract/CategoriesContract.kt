@@ -40,7 +40,7 @@ internal sealed class CategoriesEvent : StoreEvent {
     data class Init(val input: CategoriesInput, val isRestore: Boolean) : CategoriesEvent()
     data object RestoreDefaultCategories : CategoriesEvent()
     data class AddSubCategory(val name: String, val mainCategory: MainCategoryUi) : CategoriesEvent()
-    data class AddMainCategory(val name: String) : CategoriesEvent()
+    data class AddMainCategory(val name: String, val customIconKey: String?) : CategoriesEvent()
     data class ChangeMainCategory(val mainCategory: MainCategoryUi) : CategoriesEvent()
     data class UpdateMainCategory(val mainCategory: MainCategoryUi) : CategoriesEvent()
     data class UpdateSubCategory(val subCategory: SubCategoryUi) : CategoriesEvent()

@@ -56,7 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.template.RepeatTime
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.categories.MainCategoryUi
 import ru.aleshin.core.presentation.models.categories.SubCategoryUi
 import ru.aleshin.core.presentation.models.templates.TemplateUi
@@ -224,7 +224,10 @@ private fun TemplatesChooserItem(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                val categoryIcon = model.category.defaultType?.mapToIconPainter()
+                val categoryIcon = resolveMainCategoryIconPainter(
+                    customIconKey = model.category.customIconKey,
+                    defaultType = model.category.defaultType,
+                )
                 val categoryName = model.category.fetchName() ?: "*"
                 if (categoryIcon != null) {
                     CategoryIconMonogram(

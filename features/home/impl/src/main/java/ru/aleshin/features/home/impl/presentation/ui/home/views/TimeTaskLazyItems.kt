@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.tasks.TimeTaskDetailsUi
 import ru.aleshin.core.utils.extensions.duration
 import ru.aleshin.core.utils.functional.Constants
@@ -94,7 +94,10 @@ internal fun LazyItemScope.PlannedTimeTaskItem(
                     taskTitle = mainCategory.fetchName() ?: HomeThemeRes.strings.noneTitle,
                     taskSubTitle = model.subCategory?.name,
                     taskDurationTitle = duration.toMinutesOrHoursTitle(),
-                    categoryIcon = mainCategory.defaultType?.mapToIconPainter(),
+                    categoryIcon = resolveMainCategoryIconPainter(
+                        customIconKey = mainCategory.customIconKey,
+                        defaultType = mainCategory.defaultType,
+                    ),
                     priority = priority,
                     enabledNotifications = isEnableNotification,
                     note = note,
@@ -148,7 +151,10 @@ internal fun LazyItemScope.CompletedTimeTaskItem(
                     onDoneChange = onDoneChange,
                     taskTitle = mainCategory.fetchName() ?: HomeThemeRes.strings.noneTitle,
                     taskSubTitle = subCategory?.name,
-                    categoryIcon = mainCategory.defaultType?.mapToIconPainter(),
+                    categoryIcon = resolveMainCategoryIconPainter(
+                        customIconKey = mainCategory.customIconKey,
+                        defaultType = mainCategory.defaultType,
+                    ),
                     isCompleted = isCompleted,
                     note = note,
                 )
@@ -205,7 +211,10 @@ internal fun LazyItemScope.RunningTimeTaskItem(
                     onReduceTime = onReduceTime,
                     taskTitle = mainCategory.fetchName() ?: HomeThemeRes.strings.noneTitle,
                     taskSubTitle = subCategory?.name,
-                    categoryIcon = mainCategory.defaultType?.mapToIconPainter(),
+                    categoryIcon = resolveMainCategoryIconPainter(
+                        customIconKey = mainCategory.customIconKey,
+                        defaultType = mainCategory.defaultType,
+                    ),
                     priority = priority,
                     note = note,
                 )

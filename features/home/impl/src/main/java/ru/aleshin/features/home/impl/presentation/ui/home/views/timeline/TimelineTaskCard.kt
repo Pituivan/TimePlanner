@@ -51,7 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import ru.aleshin.core.domain.entities.tasks.TimeTaskStatus
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.utils.functional.TimeRange
 import ru.aleshin.features.home.impl.presentation.models.TimelineTimeTaskUi
 import ru.aleshin.features.home.impl.presentation.theme.HomeThemeRes
@@ -213,7 +213,10 @@ private fun TimelineTaskCategory(
     val timeTask = model.timeTask
     val mainCategory = timeTask.category.fetchName() ?: HomeThemeRes.strings.noneTitle
     val title = timeTask.subCategory?.name ?: mainCategory
-    val categoryIcon = timeTask.category.defaultType?.mapToIconPainter()
+    val categoryIcon = resolveMainCategoryIconPainter(
+        customIconKey = timeTask.category.customIconKey,
+        defaultType = timeTask.category.defaultType,
+    )
 
     if (categoryIcon != null) {
         CategoryIconMonogram(

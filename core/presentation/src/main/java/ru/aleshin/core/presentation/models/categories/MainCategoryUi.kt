@@ -31,6 +31,7 @@ import ru.aleshin.timeplanner.core.ui.theme.tokens.TimePlannerStrings
 data class MainCategoryUi(
     val id: Long = 0,
     val customName: String? = null,
+    val customIconKey: String? = null,
     val defaultType: DefaultCategoryType? = DefaultCategoryType.EMPTY,
 ) {
 

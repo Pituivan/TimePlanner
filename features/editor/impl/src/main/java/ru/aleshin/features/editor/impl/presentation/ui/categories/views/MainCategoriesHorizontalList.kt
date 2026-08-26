@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
+import ru.aleshin.core.presentation.mappers.mapToCategoryIconPainter
 import ru.aleshin.core.presentation.mappers.mapToIconPainter
 import ru.aleshin.timeplanner.core.ui.views.WarningDeleteDialog
 import ru.aleshin.core.presentation.models.categories.MainCategoryUi
@@ -100,8 +101,8 @@ internal fun MainCategoriesHorizontalList(
                 category = category,
                 onSelected = { onSelectCategory(category) },
                 onDelete = { onDeleteCategory(category) },
-                onUpdate = {
-                    onUpdateCategory(category.copy(customName = it))
+                onUpdate = { name, customIconKey ->
+                    onUpdateCategory(category.copy(customName = name, customIconKey = customIconKey))
                 },
             )
         }
@@ -141,8 +142,8 @@ internal fun MainCategoriesVerticalList(
                     useVerticalLayout = true,
                     onSelected = { onSelectCategory(category) },
                     onDelete = { onDeleteCategory(category) },
-                    onUpdate = {
-                        onUpdateCategory(category.copy(customName = it))
+                    onUpdate = { name, customIconKey ->
+                        onUpdateCategory(category.copy(customName = name, customIconKey = customIconKey))
                     },
                 )
             }
@@ -163,7 +164,7 @@ internal fun MainCategoryItem(
     useVerticalLayout: Boolean = false,
     onSelected: () -> Unit,
     onDelete: () -> Unit,
-    onUpdate: (name: String) -> Unit,
+    onUpdate: (name: String, customIconKey: String?) -> Unit,
 ) {
     var isExpanded by rememberSaveable { mutableStateOf(false) }
     var isCreatorDialogOpen by rememberSaveable { mutableStateOf(false) }
@@ -188,7 +189,8 @@ internal fun MainCategoryItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 MainCategoryItemLeading(
-                    icon = category.defaultType?.mapToIconPainter(),
+                    icon = category.customIconKey?.mapToCategoryIconPainter()
+                        ?: category.defaultType?.mapToIconPainter(),
                     name = category.fetchName() ?: "*",
                     isSelected = isSelected,
                 )
@@ -229,7 +231,8 @@ internal fun MainCategoryItem(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     MainCategoryItemLeading(
-                        icon = category.defaultType?.mapToIconPainter(),
+                        icon = category.customIconKey?.mapToCategoryIconPainter()
+                            ?: category.defaultType?.mapToIconPainter(),
                         name = category.fetchName() ?: "*",
                         isSelected = isSelected,
                     )
@@ -288,8 +291,8 @@ internal fun MainCategoryItem(
         MainCategoryEditorDialog(
             editCategory = category,
             onDismiss = { isCreatorDialogOpen = false },
-            onConfirm = { name ->
-                onUpdate(name)
+            onConfirm = { name, customIconKey ->
+                onUpdate(name, customIconKey)
                 isCreatorDialogOpen = false
             },
         )

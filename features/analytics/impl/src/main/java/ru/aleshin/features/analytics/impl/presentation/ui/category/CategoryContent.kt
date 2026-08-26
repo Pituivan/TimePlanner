@@ -64,6 +64,7 @@ internal fun CategoryContent(
                 isCompact = adaptiveLayoutInfo.isCompactWidth,
                 title = state.category?.fetchName().orEmpty(),
                 categoryId = state.category?.id,
+                customIconKey = state.category?.customIconKey,
                 defaultType = state.category?.defaultType,
                 isLoading = state.isLoading && state.category == null,
                 onBack = { store.dispatchEvent(CategoryEvent.NavigateBack) },

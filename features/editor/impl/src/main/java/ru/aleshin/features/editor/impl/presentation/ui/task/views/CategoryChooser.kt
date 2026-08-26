@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
+import ru.aleshin.core.presentation.mappers.mapToCategoryIconPainter
 import ru.aleshin.core.presentation.mappers.mapToIconPainter
 import ru.aleshin.core.presentation.models.categories.MainCategoryUi
 import ru.aleshin.features.editor.impl.presentation.theme.EditorThemeRes
@@ -84,7 +85,8 @@ internal fun MainCategoryChooser(
     onChangeCategory: (MainCategoryUi) -> Unit,
 ) {
     var openSubCategorySelectorSheet by rememberSaveable { mutableStateOf(false) }
-    val categoryIcon = currentCategory?.defaultType?.mapToIconPainter()
+    val categoryIcon = currentCategory?.customIconKey?.mapToCategoryIconPainter()
+        ?: currentCategory?.defaultType?.mapToIconPainter()
     val categoryName = currentCategory?.fetchName()
     
     Surface(
@@ -236,7 +238,8 @@ private fun MainCategorySelectorBottomSheet(
                 },
                 leadingIcon = {
                     val title = category.fetchName() ?: "*"
-                    val icon = category.defaultType?.mapToIconPainter()
+                    val icon = category.customIconKey?.mapToCategoryIconPainter()
+                        ?: category.defaultType?.mapToIconPainter()
                     if (icon != null) {
                         CategoryIconMonogram(
                             icon = icon,

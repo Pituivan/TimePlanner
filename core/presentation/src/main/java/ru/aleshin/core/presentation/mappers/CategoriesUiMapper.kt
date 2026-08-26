@@ -28,12 +28,14 @@ import ru.aleshin.core.presentation.models.categories.SubCategoryUi
 fun MainCategoryUi.mapToDomain() = MainCategory(
     id = id,
     customName = customName,
+    customIconKey = customIconKey,
     default = defaultType,
 )
 
 fun MainCategory.mapToUi() = MainCategoryUi(
     id = id,
     customName = customName,
+    customIconKey = customIconKey,
     defaultType = default,
 )
 

@@ -52,7 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.tasks.UndefinedTaskUi
 import ru.aleshin.core.utils.extensions.alphaByEnabled
 import ru.aleshin.features.editor.impl.presentation.theme.EditorThemeRes
@@ -200,7 +200,10 @@ private fun UndefinedTasksChooserItem(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Box(modifier = Modifier.align(Alignment.Top)) {
-                    val categoryIcon = model.mainCategory.defaultType?.mapToIconPainter()
+                    val categoryIcon = resolveMainCategoryIconPainter(
+                        customIconKey = model.mainCategory.customIconKey,
+                        defaultType = model.mainCategory.defaultType,
+                    )
                     if (categoryIcon != null) {
                         CategoryIconMonogram(
                             icon = categoryIcon,

@@ -41,7 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi
 import ru.aleshin.core.presentation.models.categories.MainCategoryUi
 import ru.aleshin.core.presentation.models.categories.SubCategoryUi
@@ -123,10 +123,14 @@ internal fun MainCategoriesChooseMenu(
                 DropdownMenuItem(
                     onClick = { onChoose(category) },
                     leadingIcon = {
-                        if (category.defaultType != null) {
+                        val categoryIcon = resolveMainCategoryIconPainter(
+                            customIconKey = category.customIconKey,
+                            defaultType = category.defaultType,
+                        )
+                        if (categoryIcon != null) {
                             Icon(
                                 modifier = Modifier.size(18.dp),
-                                painter = category.defaultType!!.mapToIconPainter(),
+                                painter = categoryIcon,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                             )

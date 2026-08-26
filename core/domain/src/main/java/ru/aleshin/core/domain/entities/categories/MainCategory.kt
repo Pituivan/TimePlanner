@@ -24,5 +24,6 @@ import kotlinx.serialization.Serializable
 data class MainCategory(
     val id: Long = 0,
     val customName: String? = null,
+    val customIconKey: String? = null,
     val default: DefaultCategoryType? = DefaultCategoryType.EMPTY,
 )

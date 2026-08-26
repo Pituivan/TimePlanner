@@ -40,7 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.goals.GoalMetric
 import ru.aleshin.core.domain.entities.goals.GoalProgressStatus
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.features.overview.impl.presentation.models.GoalProgressUi
 import ru.aleshin.features.overview.impl.presentation.theme.OverviewThemeRes
 import ru.aleshin.features.overview.impl.presentation.theme.tokens.fetchOverviewCategoryColors
@@ -92,7 +92,10 @@ internal fun GoalCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 val categoryTitle = category?.fetchName()
-                val categoryIcon = category?.defaultType?.mapToIconPainter()
+                val categoryIcon = resolveMainCategoryIconPainter(
+                    customIconKey = category?.customIconKey,
+                    defaultType = category?.defaultType,
+                )
 
                 when {
                     categoryIcon != null -> CategoryIconMonogram(
