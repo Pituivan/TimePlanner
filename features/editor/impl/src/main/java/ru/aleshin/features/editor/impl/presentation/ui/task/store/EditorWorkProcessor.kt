@@ -16,6 +16,7 @@
 package ru.aleshin.features.editor.impl.presentation.ui.task.store
 
 import kotlinx.coroutines.flow.flow
+import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
 import ru.aleshin.core.presentation.mappers.mapToDomain
 import ru.aleshin.core.presentation.mappers.mapToUi
 import ru.aleshin.core.presentation.models.categories.MainCategoryUi
@@ -129,7 +130,16 @@ internal interface EditorWorkProcessor :
     }
 
         private fun reorderCategoriesWork(categories: List<ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi>) = flow {
-            val domainCategories = categories.map { category -> category.mapToDomain() }
+            val absentCategory = categories.firstOrNull {
+                it.mainCategory.defaultType == DefaultCategoryType.EMPTY
+            }
+            val sanitizedCategories = when (absentCategory != null) {
+                true -> listOf(absentCategory) + categories.filterNot {
+                    it.mainCategory.id == absentCategory.mainCategory.id
+                }
+                false -> categories
+            }
+            val domainCategories = sanitizedCategories.map { category -> category.mapToDomain() }
             categoriesInteractor.updateCategoriesOrder(domainCategories).handle(
                 onLeftAction = { emit(EffectResult(TaskEffect.ShowError(it))) }
             )

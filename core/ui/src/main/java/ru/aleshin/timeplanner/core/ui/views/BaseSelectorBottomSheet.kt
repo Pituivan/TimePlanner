@@ -81,6 +81,7 @@ fun <T> BaseSelectorBottomSheet(
     searchBar: @Composable (() -> Unit)? = null,
     filters: @Composable (RowScope.() -> Unit)? = null,
     reorderEnabled: Boolean = false,
+    isItemReorderable: ((Int, T) -> Boolean)? = null,
     onItemsReordered: ((List<T>) -> Unit)? = null,
     itemsListState: LazyListState = rememberLazyListState(),
     properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties,
@@ -152,8 +153,9 @@ fun <T> BaseSelectorBottomSheet(
                     key = if (itemKeys != null) { _, item -> itemKeys(item) } else null,
                 ) { index, item ->
                     val isDragged = draggedIndex == index
+                    val canReorderItem = isItemReorderable?.invoke(index, item) ?: true
                     Box(
-                        modifier = if (reorderEnabled && onItemsReordered != null) {
+                        modifier = if (reorderEnabled && onItemsReordered != null && canReorderItem) {
                             Modifier.pointerInput(reorderEnabled) {
                                 detectDragGesturesAfterLongPress(
                                     onDragStart = {

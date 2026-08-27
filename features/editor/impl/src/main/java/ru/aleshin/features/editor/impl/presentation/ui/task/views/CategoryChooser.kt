@@ -182,6 +182,13 @@ private fun MainCategorySelectorBottomSheet(
     onAddCategory: (() -> Unit)? = null,
     onReorderCategories: ((List<MainCategoryUi>) -> Unit)? = null,
 ) {
+    fun MainCategoryUi.isAbsentCategory() = defaultType == DefaultCategoryType.EMPTY
+
+    fun List<MainCategoryUi>.withAbsentPinnedFirst(): List<MainCategoryUi> {
+        val absent = firstOrNull { it.isAbsentCategory() } ?: return this
+        return listOf(absent) + filterNot { it.id == absent.id }
+    }
+
     val coreStrings = TimePlannerRes.strings
     var selectedCategory by remember {
         mutableStateOf(initCategory ?: allCategories.firstOrNull())
@@ -198,9 +205,12 @@ private fun MainCategorySelectorBottomSheet(
         selected = selectedCategory,
         items = searchedCategory,
         reorderEnabled = onReorderCategories != null && searchQuery.isNullOrBlank(),
+        isItemReorderable = { index, category ->
+            !(index == 0 && category.isAbsentCategory())
+        },
         onItemsReordered = { reordered ->
             if (searchQuery.isNullOrBlank()) {
-                onReorderCategories?.invoke(reordered)
+                onReorderCategories?.invoke(reordered.withAbsentPinnedFirst())
             }
         },
         header = EditorThemeRes.strings.mainCategoryChooserTitle,

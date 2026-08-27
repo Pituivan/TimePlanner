@@ -16,17 +16,24 @@
 package ru.aleshin.features.editor.impl.presentation.ui.task.store
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Test
+import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
+import ru.aleshin.core.domain.entities.categories.MainCategory
 import ru.aleshin.core.domain.entities.categories.MainCategoryDetails
 import ru.aleshin.core.domain.entities.categories.SubCategory
+import ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi
+import ru.aleshin.core.presentation.models.categories.MainCategoryUi
 import ru.aleshin.core.domain.entities.settings.TasksSettings
 import ru.aleshin.core.domain.entities.tasks.UndefinedTask
 import ru.aleshin.core.domain.entities.template.Template
 import ru.aleshin.core.utils.architecture.store.work.WorkResult
+import ru.aleshin.core.utils.functional.Either
 import ru.aleshin.core.utils.functional.DomainResult
 import ru.aleshin.core.utils.functional.FlowDomainResult
 import ru.aleshin.core.utils.functional.TimeRange
@@ -67,6 +74,50 @@ internal class EditorWorkProcessorTest {
 
         assertNull(action.editModel?.linkedTemplateId)
         assertFalse(checkNotNull(action.editModel).isRepeat)
+    }
+
+    @Test
+    fun reorderCategoriesPinsAbsentCategoryFirstBeforeSaving() = runBlocking {
+        val categoriesInteractor = RecordingCategoriesInteractor()
+        val processor = EditorWorkProcessor.Base(
+            categoriesInteractor = categoriesInteractor,
+            undefinedTasksInteractor = UnusedUndefinedTasksInteractor(),
+            templatesInteractor = UnusedTemplatesInteractor(),
+            settingsInteractor = UnusedSettingsInteractor(),
+            dateManager = UnusedDateManager(),
+        )
+        val reorderedUiCategories = listOf(
+            MainCategoryDetailsUi(
+                mainCategory = MainCategoryUi(id = 2L, customName = "Work", defaultType = DefaultCategoryType.WORK),
+                subCategories = emptyList(),
+            ),
+            MainCategoryDetailsUi(
+                mainCategory = MainCategoryUi(id = 1L, customName = null, defaultType = DefaultCategoryType.EMPTY),
+                subCategories = emptyList(),
+            ),
+            MainCategoryDetailsUi(
+                mainCategory = MainCategoryUi(id = 3L, customName = "Rest", defaultType = DefaultCategoryType.REST),
+                subCategories = emptyList(),
+            ),
+        )
+
+        processor.work(EditorWorkCommand.ReorderCategories(reorderedUiCategories)).collect()
+
+        assertEquals(listOf(1L, 2L, 3L), categoriesInteractor.lastReorderedCategoryIds)
+    }
+}
+
+private class RecordingCategoriesInteractor : CategoriesInteractor {
+
+    var lastReorderedCategoryIds: List<Long> = emptyList()
+
+    override suspend fun fetchCategories(): FlowDomainResult<EditorFailures, List<MainCategoryDetails>> = unused()
+
+    override suspend fun addSubCategory(subCategory: SubCategory): DomainResult<EditorFailures, Unit> = unused()
+
+    override suspend fun updateCategoriesOrder(categories: List<MainCategoryDetails>): DomainResult<EditorFailures, Unit> {
+        lastReorderedCategoryIds = categories.map(MainCategoryDetails::category).map(MainCategory::id)
+        return Either.Right(Unit)
     }
 }
 
