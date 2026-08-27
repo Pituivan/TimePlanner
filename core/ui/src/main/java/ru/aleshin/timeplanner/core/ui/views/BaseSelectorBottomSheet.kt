@@ -178,12 +178,26 @@ fun <T> BaseSelectorBottomSheet(
 
                                         var updatedIndex = currentIndex
                                         while (draggedItemOffset > threshold && updatedIndex < reorderedItems.lastIndex) {
-                                            moveItem(updatedIndex, updatedIndex + 1)
+                                            val targetIndex = updatedIndex + 1
+                                            val targetItem = reorderedItems[targetIndex]
+                                            val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
+                                            if (!canMoveToTarget) {
+                                                draggedItemOffset = threshold
+                                                break
+                                            }
+                                            moveItem(updatedIndex, targetIndex)
                                             updatedIndex += 1
                                             draggedItemOffset -= currentItemSize
                                         }
                                         while (draggedItemOffset < -threshold && updatedIndex > 0) {
-                                            moveItem(updatedIndex, updatedIndex - 1)
+                                            val targetIndex = updatedIndex - 1
+                                            val targetItem = reorderedItems[targetIndex]
+                                            val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
+                                            if (!canMoveToTarget) {
+                                                draggedItemOffset = -threshold
+                                                break
+                                            }
+                                            moveItem(updatedIndex, targetIndex)
                                             updatedIndex -= 1
                                             draggedItemOffset += currentItemSize
                                         }
