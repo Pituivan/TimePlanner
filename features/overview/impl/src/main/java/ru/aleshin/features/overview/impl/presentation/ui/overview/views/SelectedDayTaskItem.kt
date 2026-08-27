@@ -37,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.tasks.TimeTaskUi
 import ru.aleshin.features.overview.impl.presentation.theme.OverviewThemeRes
 import ru.aleshin.features.overview.impl.presentation.theme.tokens.fetchOverviewCategoryColors
@@ -107,7 +107,10 @@ internal fun SelectedDayTaskItem(
                     .background(categoryColors.accent),
             )
         }
-        val categoryIcon = task.category.defaultType?.mapToIconPainter()
+        val categoryIcon = resolveMainCategoryIconPainter(
+            customIconKey = task.category.customIconKey,
+            defaultType = task.category.defaultType,
+        )
         if (categoryIcon != null) {
             CategoryIconMonogram(
                 modifier = Modifier.size(36.dp),

@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.templates.TemplateUi
 import ru.aleshin.features.templates.impl.presentation.models.TemplatePatternDayUi
 import ru.aleshin.features.templates.impl.presentation.theme.TemplatesThemeRes
@@ -91,7 +91,10 @@ private fun TemplatesPatternMenuItem(
     val subCategoryTitle = template.subCategory?.name?.takeIf { title -> title.isNotBlank() }
     val title = subCategoryTitle ?: categoryTitle
     val subtitle = categoryTitle.takeIf { subCategoryTitle != null }
-    val categoryIcon = template.category.defaultType?.mapToIconPainter()
+    val categoryIcon = resolveMainCategoryIconPainter(
+        customIconKey = template.category.customIconKey,
+        defaultType = template.category.defaultType,
+    )
     val colors = fetchTemplatesCategoryColors(template.category.id)
 
     Row(

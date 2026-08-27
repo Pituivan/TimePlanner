@@ -54,7 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import ru.aleshin.core.presentation.mappers.mapToIcon
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.utils.charts.CategoryColorsDefaults
 import ru.aleshin.features.analytics.impl.domain.entities.AnalyticsCategorySort
 import ru.aleshin.features.analytics.impl.domain.entities.AnalyticsComparisonState
@@ -242,10 +242,13 @@ private fun AnalyticsCategoryRow(
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            val defaultType = category?.defaultType
-            if (defaultType != null) {
+            val categoryIcon = resolveMainCategoryIconPainter(
+                customIconKey = category?.customIconKey,
+                defaultType = category?.defaultType,
+            )
+            if (categoryIcon != null) {
                 CategoryIconMonogram(
-                    icon = painterResource(defaultType.mapToIcon(TimePlannerRes.icons)),
+                    icon = categoryIcon,
                     iconDescription = null,
                     iconColor = categoryColor,
                     backgroundColor = categoryColor.copy(alpha = 0.16f),

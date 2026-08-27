@@ -46,7 +46,7 @@ internal interface CategoriesWorkProcessor :
         override suspend fun work(command: CategoriesWorkCommand) = when (command) {
             is CategoriesWorkCommand.LoadCategories -> loadCategoriesWork(command.selectedCategoryId)
             is CategoriesWorkCommand.RestoreDefaultCategories -> restoreDefaultCategories()
-            is CategoriesWorkCommand.AddMainCategory -> addMainCategory(command.name)
+            is CategoriesWorkCommand.AddMainCategory -> addMainCategory(command.name, command.customIconKey)
             is CategoriesWorkCommand.AddSubCategory -> addSubCategory(command.name, command.mainCategory)
             is CategoriesWorkCommand.UpdateMainCategory -> updateMainCategory(command.mainCategory)
             is CategoriesWorkCommand.UpdateSubCategory -> updateSubCategory(command.subCategory)
@@ -88,8 +88,12 @@ internal interface CategoriesWorkProcessor :
             )
         }
 
-        private fun addMainCategory(categoryName: String) = flow {
-            val mainCategory = MainCategoryUi(customName = categoryName, defaultType = null)
+        private fun addMainCategory(categoryName: String, customIconKey: String?) = flow {
+            val mainCategory = MainCategoryUi(
+                customName = categoryName,
+                customIconKey = customIconKey,
+                defaultType = null,
+            )
             categoriesInteractor.addOrUpdateMainCategory(mainCategory.mapToDomain()).handle(
                 onLeftAction = { emit(EffectResult(CategoriesEffect.ShowError(it))) },
                 onRightAction = { id ->
@@ -129,7 +133,7 @@ internal sealed class CategoriesWorkCommand : WorkCommand {
     data class LoadCategories(val selectedCategoryId: Long?) : CategoriesWorkCommand()
     data object RestoreDefaultCategories : CategoriesWorkCommand()
     data class AddSubCategory(val name: String, val mainCategory: MainCategoryUi) : CategoriesWorkCommand()
-    data class AddMainCategory(val name: String) : CategoriesWorkCommand()
+    data class AddMainCategory(val name: String, val customIconKey: String?) : CategoriesWorkCommand()
     data class UpdateSubCategory(val subCategory: SubCategoryUi) : CategoriesWorkCommand()
     data class UpdateMainCategory(val mainCategory: MainCategoryUi) : CategoriesWorkCommand()
     data class DeleteSubCategory(val subCategory: SubCategoryUi) : CategoriesWorkCommand()

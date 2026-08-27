@@ -27,5 +27,6 @@ import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
 data class MainCategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo("custom_name") val customName: String?,
+    @ColumnInfo("custom_icon_key") val customIconKey: String?,
     @ColumnInfo("default_category_type") val defaultType: DefaultCategoryType?,
 )

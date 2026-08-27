@@ -76,7 +76,7 @@ internal class CategoriesComposeStore @Inject constructor(
                 categoriesWorkProcessor.work(command).collectAndHandleWork()
             }
             is CategoriesEvent.AddMainCategory -> launchBackgroundWork(BackgroundKey.CATEGORY_ACTION){
-                val command = CategoriesWorkCommand.AddMainCategory(event.name)
+                val command = CategoriesWorkCommand.AddMainCategory(event.name, event.customIconKey)
                 categoriesWorkProcessor.work(command).collectAndHandleWork()
             }
             is CategoriesEvent.DeleteMainCategory -> launchBackgroundWork(BackgroundKey.CATEGORY_ACTION){

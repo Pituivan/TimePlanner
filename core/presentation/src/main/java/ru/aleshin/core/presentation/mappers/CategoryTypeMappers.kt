@@ -16,6 +16,7 @@
 package ru.aleshin.core.presentation.mappers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
 import ru.aleshin.timeplanner.core.ui.theme.TimePlannerRes
@@ -66,3 +67,78 @@ fun DefaultCategoryType.mapToName() = mapToString(TimePlannerRes.strings)
 
 @Composable
 fun DefaultCategoryType.mapToIconPainter() = painterResource(id = mapToIcon(TimePlannerRes.icons))
+
+fun String.mapToCategoryIcon(icons: TimePlannerIcons): Int? = when (this) {
+    "work" -> icons.categoryWorkIcon
+    "rest" -> icons.categoryRestIcon
+    "affairs" -> icons.categoryAffairsIcon
+    "transport" -> icons.categoryTransportIcon
+    "study" -> icons.categoryStudyIcon
+    "eat" -> icons.categoryEatIcon
+    "entertainments" -> icons.categoryEntertainmentsIcon
+    "sport" -> icons.categorySportIcon
+    "sleep" -> icons.categorySleepIcon
+    "culture" -> icons.categoryCultureIcon
+    "other" -> icons.categoryOtherIcon
+    "hygiene" -> icons.categoryHygiene
+    "health" -> icons.categoryHealth
+    "shopping" -> icons.categoryShopping
+    "projects" -> icons.categoryCustomIconRocket
+    "pets" -> icons.categoryCustomIconPets
+    "call" -> icons.categoryCustomIconCall
+    "meditate" -> icons.categoryCustomIconMeditate
+    "people" -> icons.categoryCustomIconGroup
+    "code" -> icons.categoryCustomIconCode
+    "growth" -> icons.categoryCustomIconGrowth
+    "event" -> icons.categoryCustomIconEvent
+    "read" -> icons.categoryCustomIconBook
+    "person" -> icons.categoryCustomIconUser
+    "hiking" -> icons.categoryCustomIconHiking
+    "art" -> icons.categoryCustomIconArt
+    "music" -> icons.categoryCustomIconMusic
+    else -> null
+}
+
+fun resolveMainCategoryIconKey(
+    customIconKey: String?,
+    defaultType: DefaultCategoryType?,
+): String? = customIconKey ?: defaultType?.takeIf { it != DefaultCategoryType.EMPTY }?.name?.lowercase()
+
+@Composable
+fun resolveMainCategoryIconPainter(
+    customIconKey: String?,
+    defaultType: DefaultCategoryType?,
+): Painter? = resolveMainCategoryIconKey(customIconKey, defaultType)?.mapToCategoryIconPainter()
+
+@Composable
+fun String.mapToCategoryIconPainter() = mapToCategoryIcon(TimePlannerRes.icons)?.let { painterResource(id = it) }
+
+fun fetchMainCategoryIconKeys() = listOf(
+    "work",
+    "rest",
+    "affairs",
+    "transport",
+    "study",
+    "eat",
+    "entertainments",
+    "sport",
+    "sleep",
+    "culture",
+    "other",
+    "hygiene",
+    "health",
+    "shopping",
+    "projects",
+    "pets",
+    "call",
+    "meditate",
+    "people",
+    "code",
+    "growth",
+    "event",
+    "read",
+    "person",
+    "hiking",
+    "art",
+    "music",
+)

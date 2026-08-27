@@ -163,6 +163,34 @@ class SchedulesDataBaseMigrationTest {
         database.close()
     }
 
+    @Test
+    fun migrate18To19AddsNullableCustomIconKeyToMainCategories() {
+        helper.createDatabase(MAIN_CATEGORY_ICON_TEST_DB, 18).apply {
+            execSQL(
+                "INSERT INTO `mainCategories` (`id`, `custom_name`, `default_category_type`) " +
+                    "VALUES (1, 'Work', 'WORK')",
+            )
+            close()
+        }
+
+        val database = helper.runMigrationsAndValidate(
+            MAIN_CATEGORY_ICON_TEST_DB,
+            19,
+            true,
+            SchedulesDataBase.MIGRATE_18_19,
+        )
+
+        database.query(
+            "SELECT `custom_icon_key`, `custom_name`, `default_category_type` FROM `mainCategories` WHERE `id` = 1",
+        ).use { cursor ->
+            cursor.moveToFirst()
+            assertNull(cursor.getString(0))
+            assertEquals("Work", cursor.getString(1))
+            assertEquals("WORK", cursor.getString(2))
+        }
+        database.close()
+    }
+
     private fun SupportSQLiteDatabase.insertBaseScheduleData(
         scheduleDate: Long,
         startTime: Long,
@@ -226,6 +254,7 @@ class SchedulesDataBaseMigrationTest {
         private const val TEST_DB = "schedules-migration-test"
         private const val GOALS_TEST_DB = "goals-migration-test"
         private const val GOAL_DEADLINE_TEST_DB = "goal-deadline-migration-test"
+        private const val MAIN_CATEGORY_ICON_TEST_DB = "main-category-icon-migration-test"
         private const val HOURS_9 = 9L * 60L * 60L * 1000L
         private const val HOURS_10 = 10L * 60L * 60L * 1000L
     }

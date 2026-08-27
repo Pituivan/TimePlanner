@@ -37,14 +37,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.categories.DefaultCategoryType
-import ru.aleshin.core.presentation.mappers.mapToIcon
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.utils.charts.CategoryColorsDefaults
 import ru.aleshin.features.analytics.impl.presentation.theme.AnalyticsThemeRes
-import ru.aleshin.timeplanner.core.ui.theme.TimePlannerRes
 import ru.aleshin.timeplanner.core.ui.views.CategoryIconMonogram
 import ru.aleshin.timeplanner.core.ui.views.CategoryTextMonogram
 
@@ -58,6 +56,7 @@ internal fun CategoryTopAppBar(
     isCompact: Boolean,
     title: String,
     categoryId: Long?,
+    customIconKey: String?,
     defaultType: DefaultCategoryType?,
     isLoading: Boolean,
     onBack: () -> Unit,
@@ -72,6 +71,7 @@ internal fun CategoryTopAppBar(
             title = {
                 CategoryTopAppBarTitle(
                     title = title,
+                    customIconKey = customIconKey,
                     defaultType = defaultType,
                     categoryColor = categoryColor,
                     isLoading = isLoading,
@@ -90,6 +90,7 @@ internal fun CategoryTopAppBar(
             title = {
                 CategoryTopAppBarTitle(
                     title = title,
+                    customIconKey = customIconKey,
                     defaultType = defaultType,
                     categoryColor = categoryColor,
                     isLoading = isLoading,
@@ -109,6 +110,7 @@ internal fun CategoryTopAppBar(
 private fun CategoryTopAppBarTitle(
     modifier: Modifier = Modifier,
     title: String,
+    customIconKey: String?,
     defaultType: DefaultCategoryType?,
     categoryColor: Color,
     isLoading: Boolean,
@@ -128,12 +130,14 @@ private fun CategoryTopAppBarTitle(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            val categoryIcon = resolveMainCategoryIconPainter(
+                customIconKey = customIconKey,
+                defaultType = defaultType,
+            )
             when {
-                defaultType != null -> CategoryIconMonogram(
+                categoryIcon != null -> CategoryIconMonogram(
                     modifier = Modifier.size(32.dp),
-                    icon = painterResource(
-                        id = defaultType.mapToIcon(icons = TimePlannerRes.icons),
-                    ),
+                    icon = categoryIcon,
                     iconSize = 20.dp,
                     iconDescription = null,
                     iconColor = categoryColor,

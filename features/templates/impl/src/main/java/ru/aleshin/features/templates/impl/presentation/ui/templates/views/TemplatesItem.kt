@@ -60,7 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import ru.aleshin.core.domain.entities.template.RepeatTime
-import ru.aleshin.core.presentation.mappers.mapToIconPainter
+import ru.aleshin.core.presentation.mappers.resolveMainCategoryIconPainter
 import ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi
 import ru.aleshin.core.presentation.models.templates.TemplateUi
 import ru.aleshin.core.utils.extensions.duration
@@ -119,7 +119,10 @@ internal fun TemplatesItem(
                 title = title,
                 categoryTitle = categoryTitle,
                 categoryColors = categoryColors,
-                categoryIcon = model.category.defaultType?.mapToIconPainter(),
+                categoryIcon = resolveMainCategoryIconPainter(
+                    customIconKey = model.category.customIconKey,
+                    defaultType = model.category.defaultType,
+                ),
                 repeatEnabled = model.repeatEnabled,
                 repeatTimes = model.repeatTimes,
                 onAddRepeat = onAddRepeat,

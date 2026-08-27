@@ -84,8 +84,8 @@ internal fun CategoriesContent(
     if (isMainCategoryDialogOpen) {
         MainCategoryEditorDialog(
             onDismiss = { isMainCategoryDialogOpen = false },
-            onConfirm = { name ->
-                store.dispatchEvent(CategoriesEvent.AddMainCategory(name))
+            onConfirm = { name, customIconKey ->
+                store.dispatchEvent(CategoriesEvent.AddMainCategory(name, customIconKey))
                 isMainCategoryDialogOpen = false
             },
         )
