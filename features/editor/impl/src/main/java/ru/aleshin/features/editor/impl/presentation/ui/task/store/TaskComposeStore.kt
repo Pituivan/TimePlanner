@@ -106,6 +106,12 @@ internal class TaskComposeStore @Inject constructor(
                     }
                 }
             }
+            is TaskEvent.ReorderCategories -> {
+                launchBackgroundWork(BackgroundKey.DATA_ACTION) {
+                    val command = EditorWorkCommand.ReorderCategories(event.categories)
+                    editorWorkProcessor.work(command).collectAndHandleWork()
+                }
+            }
             is TaskEvent.CreateTemplate -> with(state) {
                 if (editModel != null) {
                     launchBackgroundWork(BackgroundKey.DATA_ACTION) {

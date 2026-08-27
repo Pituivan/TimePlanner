@@ -25,6 +25,7 @@ import ru.aleshin.core.domain.entities.categories.MainCategoryDetails
 interface MainCategoryRepository {
     suspend fun addOrUpdateCategory(category: MainCategory): Long
     suspend fun addOrUpdateCategories(categories: List<MainCategory>)
+    suspend fun updateCategoriesOrder(categoryIds: List<Long>)
     suspend fun fetchAllCategoriesDetails(): Flow<List<MainCategoryDetails>>
     suspend fun fetchCategoryDetailsById(categoryId: Long): Flow<MainCategoryDetails?>
     suspend fun deleteCategoryById(categoryId: Long)

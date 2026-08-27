@@ -27,6 +27,7 @@ class CategoriesDataMappersTest {
     fun mapMainCategoryToDataAndBack_preservesCustomIconKey() {
         val category = MainCategory(
             id = 17L,
+            orderPosition = 5L,
             customName = "My category",
             customIconKey = "study",
             default = DefaultCategoryType.WORK,
@@ -42,6 +43,7 @@ class CategoriesDataMappersTest {
     fun mapMainCategoryEntityToDomainAndBack_preservesNullableCustomIconKey() {
         val entity = MainCategoryEntity(
             id = 11L,
+            orderPosition = 3L,
             customName = "No icon",
             customIconKey = null,
             defaultType = DefaultCategoryType.REST,

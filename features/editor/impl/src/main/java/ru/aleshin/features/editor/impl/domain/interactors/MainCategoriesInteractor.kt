@@ -16,7 +16,6 @@
 package ru.aleshin.features.editor.impl.domain.interactors
 
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import ru.aleshin.core.domain.entities.categories.MainCategory
 import ru.aleshin.core.domain.entities.categories.MainCategoryDetails
 import ru.aleshin.core.domain.repository.MainCategoryRepository
@@ -43,9 +42,7 @@ internal interface MainCategoriesInteractor {
     ) : MainCategoriesInteractor {
 
         override suspend fun fetchCategories() = eitherWrapper.wrapFlow {
-            mainCategoryRepository.fetchAllCategoriesDetails().map { categories ->
-                categories.sortedBy { it.category.id != 0L }
-            }
+            mainCategoryRepository.fetchAllCategoriesDetails()
         }
 
         override suspend fun addOrUpdateMainCategory(mainCategory: MainCategory) = eitherWrapper.wrap {

@@ -53,7 +53,13 @@ class TimeTaskDaoTest {
         ).allowMainThreadQueries().build()
         dao = database.fetchTimeTaskDao()
         database.fetchMainCategoryDao().addOrUpdateCategory(
-            MainCategoryEntity(id = CATEGORY_ID, customName = "Test", defaultType = null),
+            MainCategoryEntity(
+                id = CATEGORY_ID,
+                orderPosition = CATEGORY_ID,
+                customName = "Test",
+                customIconKey = null,
+                defaultType = null,
+            ),
         )
         database.fetchScheduleDao().addOrUpdateSchedules(
             listOf(

@@ -68,6 +68,7 @@ internal fun TaskCategoriesSection(
     onCategoriesChange: (MainCategoryUi, SubCategoryUi?) -> Unit,
     onAddCategory: () -> Unit,
     onAddSubCategory: (String) -> Unit,
+    onReorderCategories: (List<MainCategoryDetailsUi>) -> Unit,
     onNoteChange: (String?) -> Unit,
 ) {
     val mainCategories = remember(allCategories) {
@@ -93,6 +94,14 @@ internal fun TaskCategoriesSection(
                 allCategories = mainCategories,
                 onEditCategory = onEditCategory,
                 onAddCategory = onAddCategory,
+                onReorderCategories = { updatedMainCategories ->
+                    val reorderedDetails = updatedMainCategories.mapNotNull { category ->
+                        allCategories.find { details -> details.mainCategory.id == category.id }
+                    }
+                    if (reorderedDetails.size == allCategories.size) {
+                        onReorderCategories(reorderedDetails)
+                    }
+                },
                 onChangeCategory = { category ->
                     onCategoriesChange(category, null)
                 },

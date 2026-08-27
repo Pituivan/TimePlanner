@@ -36,8 +36,21 @@ interface MainCategoryDao {
     @Upsert
     suspend fun addOrUpdateCategories(entities: List<MainCategoryEntity>)
 
+    @Query("SELECT MAX(order_position) FROM mainCategories")
+    suspend fun fetchMaxOrderPosition(): Long?
+
+    @Query("UPDATE mainCategories SET order_position = :position WHERE id = :id")
+    suspend fun updateCategoryOrderPosition(id: Long, position: Long)
+
     @Transaction
-    @Query("SELECT * FROM mainCategories")
+    suspend fun updateCategoriesOrder(ids: List<Long>) {
+        ids.forEachIndexed { position, id ->
+            updateCategoryOrderPosition(id = id, position = position.toLong())
+        }
+    }
+
+    @Transaction
+    @Query("SELECT * FROM mainCategories ORDER BY order_position ASC, id ASC")
     fun fetchAllCategoriesDetails(): Flow<List<MainCategoryDetailsEntity>>
 
     @Transaction

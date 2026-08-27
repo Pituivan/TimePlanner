@@ -25,10 +25,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -47,11 +49,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import ru.aleshin.timeplanner.core.ui.theme.TimePlannerRes
 import ru.aleshin.timeplanner.core.ui.theme.material.full
@@ -70,17 +75,32 @@ fun <T> BaseSelectorBottomSheet(
     itemKeys: ((T) -> Any)? = null,
     header: String,
     title: String?,
-    itemView: @Composable LazyItemScope.(T) -> Unit,
+    itemView: @Composable LazyItemScope.(Int, T) -> Unit,
     notSelectedItem: @Composable (LazyItemScope.() -> Unit)? = null,
     addItemView: @Composable (LazyItemScope.() -> Unit)? = null,
     searchBar: @Composable (() -> Unit)? = null,
     filters: @Composable (RowScope.() -> Unit)? = null,
+    reorderEnabled: Boolean = false,
+    onItemsReordered: ((List<T>) -> Unit)? = null,
     itemsListState: LazyListState = rememberLazyListState(),
     properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
     onDismissRequest: () -> Unit,
     onConfirm: (T?) -> Unit,
 ) {
+    var reorderedItems by remember(items) { mutableStateOf(items) }
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var draggedItemOffset by remember { mutableStateOf(0f) }
+
+    fun moveItem(from: Int, to: Int) {
+        if (from == to || from !in reorderedItems.indices || to !in reorderedItems.indices) return
+        val mutableItems = reorderedItems.toMutableList()
+        val item = mutableItems.removeAt(from)
+        mutableItems.add(to, item)
+        reorderedItems = mutableItems
+        onItemsReordered?.invoke(mutableItems)
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
@@ -121,12 +141,79 @@ fun <T> BaseSelectorBottomSheet(
             LazyColumn(
                 modifier = Modifier.height(350.dp).padding(start = 16.dp, end = 16.dp, top = 12.dp),
                 state = itemsListState,
+                userScrollEnabled = draggedIndex == null,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (notSelectedItem != null) {
                     item(content = notSelectedItem, key = "NotSelectedItem")
                 }
-                items(items = items, key = itemKeys, itemContent = itemView)
+                itemsIndexed(
+                    items = reorderedItems,
+                    key = if (itemKeys != null) { _, item -> itemKeys(item) } else null,
+                ) { index, item ->
+                    val isDragged = draggedIndex == index
+                    Box(
+                        modifier = if (reorderEnabled && onItemsReordered != null) {
+                            Modifier.pointerInput(reorderEnabled) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = {
+                                        if (index in reorderedItems.indices) {
+                                            draggedIndex = index
+                                            draggedItemOffset = 0f
+                                        }
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        val currentIndex = draggedIndex ?: return@detectDragGesturesAfterLongPress
+                                        change.consume()
+                                        draggedItemOffset += dragAmount.y
+
+                                        val currentItemSize = itemsListState.layoutInfo.visibleItemsInfo
+                                            .firstOrNull { it.index == currentIndex }
+                                            ?.size
+                                            ?.toFloat()
+                                            ?: return@detectDragGesturesAfterLongPress
+                                        val threshold = currentItemSize / 2f
+
+                                        var updatedIndex = currentIndex
+                                        while (draggedItemOffset > threshold && updatedIndex < reorderedItems.lastIndex) {
+                                            moveItem(updatedIndex, updatedIndex + 1)
+                                            updatedIndex += 1
+                                            draggedItemOffset -= currentItemSize
+                                        }
+                                        while (draggedItemOffset < -threshold && updatedIndex > 0) {
+                                            moveItem(updatedIndex, updatedIndex - 1)
+                                            updatedIndex -= 1
+                                            draggedItemOffset += currentItemSize
+                                        }
+                                        if (updatedIndex != currentIndex) {
+                                            draggedIndex = updatedIndex
+                                        }
+                                    },
+                                    onDragEnd = {
+                                        draggedIndex = null
+                                        draggedItemOffset = 0f
+                                    },
+                                    onDragCancel = {
+                                        draggedIndex = null
+                                        draggedItemOffset = 0f
+                                    },
+                                )
+                            }
+                        } else {
+                            Modifier
+                        }.graphicsLayer {
+                            translationY = if (isDragged) draggedItemOffset else 0f
+                            if (isDragged) {
+                                scaleX = 1.02f
+                                scaleY = 1.02f
+                                alpha = 0.96f
+                                shadowElevation = 24.dp.toPx()
+                            }
+                        }
+                    ) {
+                        itemView(index, item)
+                    }
+                }
                 if (addItemView != null) {
                     item(content = addItemView, key = "AddItem")
                 }

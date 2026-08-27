@@ -28,6 +28,7 @@ interface MainCategoryLocalDataSource {
 
     suspend fun addOrUpdateCategory(category: MainCategoryEntity): Long
     suspend fun addOrUpdateCategories(categories: List<MainCategoryEntity>)
+    suspend fun updateCategoriesOrder(categoryIds: List<Long>)
     suspend fun fetchAllCategoriesDetails(): Flow<List<MainCategoryDetailsEntity>>
     suspend fun fetchCategoryDetailsById(categoryId: Long): Flow<MainCategoryDetailsEntity?>
     suspend fun deleteCategoryById(categoryId: Long)
@@ -43,6 +44,10 @@ interface MainCategoryLocalDataSource {
 
         override suspend fun addOrUpdateCategories(categories: List<MainCategoryEntity>) {
             mainCategoryDao.addOrUpdateCategories(categories)
+        }
+
+        override suspend fun updateCategoriesOrder(categoryIds: List<Long>) {
+            mainCategoryDao.updateCategoriesOrder(categoryIds)
         }
 
         override suspend fun fetchAllCategoriesDetails(): Flow<List<MainCategoryDetailsEntity>> {

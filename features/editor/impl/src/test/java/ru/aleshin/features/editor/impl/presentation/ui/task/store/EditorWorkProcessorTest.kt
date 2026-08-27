@@ -75,6 +75,8 @@ private class UnusedCategoriesInteractor : CategoriesInteractor {
     override suspend fun fetchCategories(): FlowDomainResult<EditorFailures, List<MainCategoryDetails>> = unused()
 
     override suspend fun addSubCategory(subCategory: SubCategory): DomainResult<EditorFailures, Unit> = unused()
+
+    override suspend fun updateCategoriesOrder(categories: List<MainCategoryDetails>): DomainResult<EditorFailures, Unit> = unused()
 }
 
 private class UnusedUndefinedTasksInteractor : UndefinedTasksInteractor {

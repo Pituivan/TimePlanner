@@ -15,7 +15,6 @@
  */
 package ru.aleshin.features.editor.impl.domain.interactors
 
-import kotlinx.coroutines.flow.map
 import ru.aleshin.core.domain.entities.categories.MainCategoryDetails
 import ru.aleshin.core.domain.entities.categories.SubCategory
 import ru.aleshin.core.domain.repository.MainCategoryRepository
@@ -33,6 +32,7 @@ internal interface CategoriesInteractor {
 
     suspend fun fetchCategories(): FlowDomainResult<EditorFailures, List<MainCategoryDetails>>
     suspend fun addSubCategory(subCategory: SubCategory): DomainResult<EditorFailures, Unit>
+    suspend fun updateCategoriesOrder(categories: List<MainCategoryDetails>): DomainResult<EditorFailures, Unit>
 
     class Base @Inject constructor(
         private val mainCategoryRepository: MainCategoryRepository,
@@ -41,13 +41,16 @@ internal interface CategoriesInteractor {
     ) : CategoriesInteractor {
 
         override suspend fun fetchCategories() = eitherWrapper.wrapFlow {
-            mainCategoryRepository.fetchAllCategoriesDetails().map { categories ->
-                categories.sortedBy { it.category.id != 0L }
-            }
+            mainCategoryRepository.fetchAllCategoriesDetails()
         }
 
         override suspend fun addSubCategory(subCategory: SubCategory) = eitherWrapper.wrap {
             subCategoryRepository.addOrUpdateSubCategories(listOf(subCategory))
+        }
+
+        override suspend fun updateCategoriesOrder(categories: List<MainCategoryDetails>) = eitherWrapper.wrap {
+            val categoryIds = categories.map { details -> details.category.id }
+            mainCategoryRepository.updateCategoriesOrder(categoryIds)
         }
     }
 }

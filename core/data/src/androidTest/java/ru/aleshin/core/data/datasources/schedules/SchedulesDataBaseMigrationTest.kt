@@ -191,6 +191,49 @@ class SchedulesDataBaseMigrationTest {
         database.close()
     }
 
+    @Test
+    fun migrate19To20AddsOrderPositionAndPreservesIdBasedEffectiveOrder() {
+        helper.createDatabase(MAIN_CATEGORY_ORDER_TEST_DB, 19).apply {
+            execSQL(
+                "INSERT INTO `mainCategories` (`id`, `custom_name`, `custom_icon_key`, `default_category_type`) " +
+                    "VALUES (2, 'Second', NULL, 'WORK')",
+            )
+            execSQL(
+                "INSERT INTO `mainCategories` (`id`, `custom_name`, `custom_icon_key`, `default_category_type`) " +
+                    "VALUES (5, 'Fifth', NULL, 'STUDY')",
+            )
+            execSQL(
+                "INSERT INTO `mainCategories` (`id`, `custom_name`, `custom_icon_key`, `default_category_type`) " +
+                    "VALUES (9, 'Ninth', NULL, 'REST')",
+            )
+            close()
+        }
+
+        val database = helper.runMigrationsAndValidate(
+            MAIN_CATEGORY_ORDER_TEST_DB,
+            20,
+            true,
+            SchedulesDataBase.MIGRATE_19_20,
+        )
+
+        database.query(
+            "SELECT `id`, `order_position` FROM `mainCategories` ORDER BY `order_position` ASC, `id` ASC",
+        ).use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(2L, cursor.getLong(0))
+            assertEquals(2L, cursor.getLong(1))
+
+            cursor.moveToNext()
+            assertEquals(5L, cursor.getLong(0))
+            assertEquals(5L, cursor.getLong(1))
+
+            cursor.moveToNext()
+            assertEquals(9L, cursor.getLong(0))
+            assertEquals(9L, cursor.getLong(1))
+        }
+        database.close()
+    }
+
     private fun SupportSQLiteDatabase.insertBaseScheduleData(
         scheduleDate: Long,
         startTime: Long,
@@ -255,6 +298,7 @@ class SchedulesDataBaseMigrationTest {
         private const val GOALS_TEST_DB = "goals-migration-test"
         private const val GOAL_DEADLINE_TEST_DB = "goal-deadline-migration-test"
         private const val MAIN_CATEGORY_ICON_TEST_DB = "main-category-icon-migration-test"
+        private const val MAIN_CATEGORY_ORDER_TEST_DB = "main-category-order-migration-test"
         private const val HOURS_9 = 9L * 60L * 60L * 1000L
         private const val HOURS_10 = 10L * 60L * 60L * 1000L
     }

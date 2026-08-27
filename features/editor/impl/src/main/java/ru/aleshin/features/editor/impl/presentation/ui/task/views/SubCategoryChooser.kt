@@ -191,7 +191,7 @@ private fun SubCategorySelectorBottomSheet(
         title = EditorThemeRes.strings.subCategoryDialogMainCategoryFormat.format(
             mainCategory?.fetchName() ?: EditorThemeRes.strings.categoryNotSelectedTitle,
         ),
-        itemView = { subCategory ->
+        itemView = { _, subCategory ->
             val dismissState = rememberSwipeToDismissBoxState(
                 confirmValueChange = { dismissBoxValue ->
                     when (dismissBoxValue) {

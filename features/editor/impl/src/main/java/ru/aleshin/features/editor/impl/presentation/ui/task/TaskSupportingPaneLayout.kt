@@ -123,6 +123,9 @@ internal fun TaskFormPane(
                 onAddSubCategory = { name ->
                     onEvent(TaskEvent.AddSubCategory(name))
                 },
+                onReorderCategories = { categories ->
+                    onEvent(TaskEvent.ReorderCategories(categories))
+                },
                 onNoteChange = { note -> onEvent(TaskEvent.ChangeNote(note)) },
             )
             HorizontalDivider(

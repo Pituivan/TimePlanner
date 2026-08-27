@@ -32,6 +32,7 @@ fun MainCategoryDetailsEntity.mapToDomain() = MainCategoryDetails(
 
 fun MainCategoryEntity.mapToDomain() = MainCategory(
     id = id,
+    orderPosition = orderPosition,
     customName = customName,
     customIconKey = customIconKey,
     default = defaultType
@@ -39,6 +40,7 @@ fun MainCategoryEntity.mapToDomain() = MainCategory(
 
 fun MainCategory.mapToData() = MainCategoryEntity(
     id = id,
+    orderPosition = orderPosition,
     customName = customName,
     customIconKey = customIconKey,
     defaultType = default

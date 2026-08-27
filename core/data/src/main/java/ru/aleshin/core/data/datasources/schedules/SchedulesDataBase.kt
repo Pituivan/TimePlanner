@@ -45,7 +45,7 @@ import ru.aleshin.core.data.models.template.TemplateEntity
  * @author Stanislav Aleshin on 25.02.2023.
  */
 @Database(
-    version = 19,
+    version = 20,
     entities = [
         GoalEntity::class,
         GoalHistoryEntity::class,
@@ -565,6 +565,22 @@ abstract class SchedulesDataBase : RoomDatabase() {
                 )
             }
         }
+        val MIGRATE_19_20 = object : Migration(19, 20) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.beginTransaction()
+                try {
+                    database.execSQL(
+                        "ALTER TABLE `mainCategories` ADD COLUMN `order_position` INTEGER NOT NULL DEFAULT 0",
+                    )
+                    database.execSQL(
+                        "UPDATE `mainCategories` SET `order_position` = `id`",
+                    )
+                    database.setTransactionSuccessful()
+                } finally {
+                    database.endTransaction()
+                }
+            }
+        }
 
         fun create(context: Context) = Room.databaseBuilder(
             context = context,
@@ -579,6 +595,7 @@ abstract class SchedulesDataBase : RoomDatabase() {
             .addMigrations(MIGRATE_16_17)
             .addMigrations(MIGRATE_17_18)
             .addMigrations(MIGRATE_18_19)
+            .addMigrations(MIGRATE_19_20)
             .build()
     }
 }

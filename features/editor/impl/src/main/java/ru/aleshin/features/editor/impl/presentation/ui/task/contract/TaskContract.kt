@@ -63,6 +63,7 @@ internal sealed class TaskEvent : StoreEvent {
     data class UpdateDurationPresets(val presets: List<Long>) : TaskEvent()
     data object PressAddCategory : TaskEvent()
     data class AddSubCategory(val name: String) : TaskEvent()
+    data class ReorderCategories(val categories: List<MainCategoryDetailsUi>) : TaskEvent()
     data class NavigateToCategoryEditor(val category: MainCategoryUi) : TaskEvent()
     data class NavigateToSubCategoryEditor(val category: SubCategoryUi) : TaskEvent()
     data object PressDeleteButton : TaskEvent()

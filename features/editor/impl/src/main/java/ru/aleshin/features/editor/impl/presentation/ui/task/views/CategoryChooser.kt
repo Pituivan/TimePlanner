@@ -82,6 +82,7 @@ internal fun MainCategoryChooser(
     currentCategory: MainCategoryUi?,
     onEditCategory: ((MainCategoryUi) -> Unit)? = null,
     onAddCategory: (() -> Unit)? = null,
+    onReorderCategories: ((List<MainCategoryUi>) -> Unit)? = null,
     onChangeCategory: (MainCategoryUi) -> Unit,
 ) {
     var openSubCategorySelectorSheet by rememberSaveable { mutableStateOf(false) }
@@ -160,6 +161,7 @@ internal fun MainCategoryChooser(
             onDismiss = { openSubCategorySelectorSheet = false },
             onEditCategory = onEditCategory,
             onAddCategory = onAddCategory,
+            onReorderCategories = onReorderCategories,
             onChooseCategory = {
                 onChangeCategory(it)
                 openSubCategorySelectorSheet = false
@@ -178,6 +180,7 @@ private fun MainCategorySelectorBottomSheet(
     onEditCategory: ((MainCategoryUi) -> Unit)? = null,
     onChooseCategory: (MainCategoryUi) -> Unit,
     onAddCategory: (() -> Unit)? = null,
+    onReorderCategories: ((List<MainCategoryUi>) -> Unit)? = null,
 ) {
     val coreStrings = TimePlannerRes.strings
     var selectedCategory by remember {
@@ -194,9 +197,15 @@ private fun MainCategorySelectorBottomSheet(
         modifier = modifier,
         selected = selectedCategory,
         items = searchedCategory,
+        reorderEnabled = onReorderCategories != null && searchQuery.isNullOrBlank(),
+        onItemsReordered = { reordered ->
+            if (searchQuery.isNullOrBlank()) {
+                onReorderCategories?.invoke(reordered)
+            }
+        },
         header = EditorThemeRes.strings.mainCategoryChooserTitle,
         title = null,
-        itemView = { category ->
+        itemView = { _, category ->
             val isSelected = category.id == selectedCategory?.id
             val density = LocalDensity.current
             val dismissState = remember(category) {

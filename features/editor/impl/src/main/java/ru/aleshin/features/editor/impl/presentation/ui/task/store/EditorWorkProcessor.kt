@@ -63,6 +63,7 @@ internal interface EditorWorkProcessor :
             is EditorWorkCommand.LoadUndefinedTasks -> loadUndefinedTasksWork()
             is EditorWorkCommand.UpdateDurationPresets -> updateDurationPresetsWork(command.presets)
             is EditorWorkCommand.AddSubCategory -> addSubCategoryWork(command.name, command.mainCategory)
+            is EditorWorkCommand.ReorderCategories -> reorderCategoriesWork(command.categories)
             is EditorWorkCommand.AddTemplate -> addTemplateWork(command.editModel)
             is EditorWorkCommand.UnlinkTemplate -> unlinkTemplateWork(command.editModel)
             is EditorWorkCommand.ApplyTemplate -> applyTemplateWork(command.template, command.model)
@@ -125,6 +126,13 @@ internal interface EditorWorkProcessor :
             categoriesInteractor.addSubCategory(subCategory.mapToDomain()).handle(
                 onLeftAction = { emit(EffectResult(TaskEffect.ShowError(it))) }
             )
+    }
+
+        private fun reorderCategoriesWork(categories: List<ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi>) = flow {
+            val domainCategories = categories.map { category -> category.mapToDomain() }
+            categoriesInteractor.updateCategoriesOrder(domainCategories).handle(
+                onLeftAction = { emit(EffectResult(TaskEffect.ShowError(it))) }
+            )
         }
 
         private fun addTemplateWork(editModel: TimeTaskEditUi) = flow {
@@ -175,6 +183,7 @@ internal sealed class EditorWorkCommand : WorkCommand {
     data object LoadUndefinedTasks : EditorWorkCommand()
     data class UpdateDurationPresets(val presets: List<Long>) : EditorWorkCommand()
     data class AddSubCategory(val name: String, val mainCategory: MainCategoryUi) : EditorWorkCommand()
+    data class ReorderCategories(val categories: List<ru.aleshin.core.presentation.models.categories.MainCategoryDetailsUi>) : EditorWorkCommand()
     data class AddTemplate(val editModel: TimeTaskEditUi) : EditorWorkCommand()
     data class UnlinkTemplate(val editModel: TimeTaskEditUi) : EditorWorkCommand()
     data class ApplyTemplate(val template: TemplateUi, val model: TimeTaskEditUi) : EditorWorkCommand()

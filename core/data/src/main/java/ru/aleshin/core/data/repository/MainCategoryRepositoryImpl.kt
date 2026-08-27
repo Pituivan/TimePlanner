@@ -16,6 +16,7 @@
 package ru.aleshin.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import ru.aleshin.core.data.datasources.categories.MainCategoryLocalDataSource
 import ru.aleshin.core.data.mappers.categories.mapToData
@@ -33,11 +34,25 @@ class MainCategoryRepositoryImpl @Inject constructor(
 ) : MainCategoryRepository {
 
     override suspend fun addOrUpdateCategory(category: MainCategory): Long {
-        return localDataSource.addOrUpdateCategory(category.mapToData())
+        if (category.id != 0L) {
+            return localDataSource.addOrUpdateCategory(category.mapToData())
+        }
+        val newOrderPosition = localDataSource.fetchAllCategoriesDetails()
+            .first()
+            .maxOfOrNull { it.mainCategory.orderPosition }
+            ?.plus(1L)
+            ?: 0L
+        return localDataSource.addOrUpdateCategory(
+            category.copy(orderPosition = newOrderPosition).mapToData()
+        )
     }
 
     override suspend fun addOrUpdateCategories(categories: List<MainCategory>) {
         return localDataSource.addOrUpdateCategories(categories.map { it.mapToData() })
+    }
+
+    override suspend fun updateCategoriesOrder(categoryIds: List<Long>) {
+        localDataSource.updateCategoriesOrder(categoryIds)
     }
 
     override suspend fun fetchAllCategoriesDetails(): Flow<List<MainCategoryDetails>> {
