@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import ru.aleshin.timeplanner.core.ui.theme.TimePlannerRes
@@ -353,15 +354,21 @@ fun <T> BaseSelectorBottomSheet(
                 ) { index, item ->
                     val isDragged = draggedIndex == index
                     Box(
-                        modifier = Modifier.graphicsLayer {
-                            translationY = if (isDragged) calculateDraggedItemTranslation(index) else 0f
-                            if (isDragged) {
-                                scaleX = 1.02f
-                                scaleY = 1.02f
-                                alpha = 0.96f
-                                shadowElevation = 24.dp.toPx()
+                        modifier = Modifier
+                            .zIndex(if (isDragged) 1f else 0f)
+                            .graphicsLayer {
+                                translationY = if (isDragged) {
+                                    calculateDraggedItemTranslation(index)
+                                } else {
+                                    0f
+                                }
+                                if (isDragged) {
+                                    scaleX = 1.02f
+                                    scaleY = 1.02f
+                                    alpha = 0.96f
+                                    shadowElevation = 24.dp.toPx()
+                                }
                             }
-                        }
                     ) {
                         itemView(index, item)
                     }
