@@ -178,11 +178,10 @@ fun <T> BaseSelectorBottomSheet(
 
         val currentTop = currentItemInfo.offset.toFloat()
         val currentSize = currentItemInfo.size.toFloat()
-        val currentCenter = currentTop + currentSize / 2f
-        var desiredCenter = (pointerY - grabOffsetY) + currentSize / 2f
+        var desiredTop = pointerY - grabOffsetY
 
         if (currentDraggedIndex == 0) {
-            desiredCenter = maxOf(desiredCenter, currentCenter - currentSize / 2f)
+            desiredTop = maxOf(desiredTop, currentTop)
         } else {
             val upperIndex = currentDraggedIndex - 1
             val upperItem = reorderedItems[upperIndex]
@@ -193,13 +192,24 @@ fun <T> BaseSelectorBottomSheet(
                 }
                 if (upperInfo != null) {
                     val upperCenter = upperInfo.offset + upperInfo.size / 2f
-                    desiredCenter = maxOf(desiredCenter, upperCenter)
+                    desiredTop = maxOf(desiredTop, upperCenter)
                 }
             }
         }
 
         if (currentDraggedIndex == reorderedItems.lastIndex) {
-            desiredCenter = minOf(desiredCenter, currentCenter + currentSize / 2f)
+            if (addItemView != null) {
+                val addItemListIndex = firstReorderableListIndex + reorderedItems.size
+                val addItemInfo = visibleItemsInfo.firstOrNull { it.index == addItemListIndex }
+                if (addItemInfo != null) {
+                    val addItemCenter = addItemInfo.offset + addItemInfo.size / 2f
+                    desiredTop = minOf(desiredTop, addItemCenter - currentSize)
+                } else {
+                    desiredTop = minOf(desiredTop, currentTop)
+                }
+            } else {
+                desiredTop = minOf(desiredTop, currentTop)
+            }
         } else {
             val lowerIndex = currentDraggedIndex + 1
             val lowerItem = reorderedItems[lowerIndex]
@@ -210,13 +220,12 @@ fun <T> BaseSelectorBottomSheet(
                 }
                 if (lowerInfo != null) {
                     val lowerCenter = lowerInfo.offset + lowerInfo.size / 2f
-                    desiredCenter = minOf(desiredCenter, lowerCenter)
+                    desiredTop = minOf(desiredTop, lowerCenter - currentSize)
                 }
             }
         }
 
-        val constrainedTop = desiredCenter - currentSize / 2f
-        return constrainedTop - currentTop
+        return desiredTop - currentTop
     }
 
     LaunchedEffect(draggedIndex, reorderEnabled, onItemsReordered, isItemReorderable) {
