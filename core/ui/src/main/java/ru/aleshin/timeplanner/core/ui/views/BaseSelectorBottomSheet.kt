@@ -128,7 +128,7 @@ fun <T> BaseSelectorBottomSheet(
         val currentItemInfo = visibleItemsInfo.firstOrNull { it.index == currentListIndex } ?: return
 
         val desiredTop = pointerY - grabOffsetY
-        val desiredCenter = desiredTop + currentItemInfo.size / 2f
+        val desiredBottom = desiredTop + currentItemInfo.size
 
         fun itemInfoByReorderedIndex(index: Int) = visibleItemsInfo
             .firstOrNull { it.index == index + firstReorderableListIndex }
@@ -138,7 +138,7 @@ fun <T> BaseSelectorBottomSheet(
             val targetIndex = updatedIndex + 1
             val targetInfo = itemInfoByReorderedIndex(targetIndex) ?: break
             val targetCenter = targetInfo.offset + targetInfo.size / 2f
-            if (desiredCenter <= targetCenter) break
+            if (desiredBottom < targetCenter) break
             val targetItem = reorderedItems[targetIndex]
             val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
             if (!canMoveToTarget) {
@@ -151,7 +151,7 @@ fun <T> BaseSelectorBottomSheet(
             val targetIndex = updatedIndex - 1
             val targetInfo = itemInfoByReorderedIndex(targetIndex) ?: break
             val targetCenter = targetInfo.offset + targetInfo.size / 2f
-            if (desiredCenter >= targetCenter) break
+            if (desiredTop > targetCenter) break
             val targetItem = reorderedItems[targetIndex]
             val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
             if (!canMoveToTarget) {
