@@ -95,10 +95,8 @@ fun <T> BaseSelectorBottomSheet(
 ) {
     var reorderedItems by remember(items) { mutableStateOf(items) }
     var draggedIndex by remember { mutableStateOf<Int?>(null) }
-    var draggedItemOffset by remember { mutableStateOf(0f) }
     var draggedPointerViewportY by remember { mutableStateOf<Float?>(null) }
-    var dragPointerDeltaY by remember { mutableStateOf(0f) }
-    var dragOffsetAnchorY by remember { mutableStateOf(0f) }
+    var draggedGrabOffsetY by remember { mutableStateOf<Float?>(null) }
     val density = LocalDensity.current
     val autoScrollEdgeDistance = with(density) { 56.dp.toPx() }
     val autoScrollMaxStep = with(density) { 18.dp.toPx() }
@@ -106,10 +104,8 @@ fun <T> BaseSelectorBottomSheet(
 
     fun resetDragState() {
         draggedIndex = null
-        draggedItemOffset = 0f
         draggedPointerViewportY = null
-        dragPointerDeltaY = 0f
-        dragOffsetAnchorY = 0f
+        draggedGrabOffsetY = null
     }
 
     fun moveItem(from: Int, to: Int) {
@@ -123,42 +119,103 @@ fun <T> BaseSelectorBottomSheet(
 
     fun consumeDragThresholds() {
         val currentIndex = draggedIndex ?: return
+        val pointerY = draggedPointerViewportY ?: return
+        val grabOffsetY = draggedGrabOffsetY ?: return
         val firstReorderableListIndex = if (notSelectedItem != null) 1 else 0
+        val visibleItemsInfo = itemsListState.layoutInfo.visibleItemsInfo
         val currentListIndex = currentIndex + firstReorderableListIndex
-        val currentItemSize = itemsListState.layoutInfo.visibleItemsInfo
-            .firstOrNull { it.index == currentListIndex }
-            ?.size
-            ?.toFloat()
-            ?: return
-        val threshold = currentItemSize / 2f
+        val currentItemInfo = visibleItemsInfo.firstOrNull { it.index == currentListIndex } ?: return
+
+        val desiredTop = pointerY - grabOffsetY
+        val desiredCenter = desiredTop + currentItemInfo.size / 2f
+
+        fun itemInfoByReorderedIndex(index: Int) = visibleItemsInfo
+            .firstOrNull { it.index == index + firstReorderableListIndex }
+
         var updatedIndex = currentIndex
-        while (draggedItemOffset > threshold && updatedIndex < reorderedItems.lastIndex) {
+        while (updatedIndex < reorderedItems.lastIndex) {
             val targetIndex = updatedIndex + 1
+            val targetInfo = itemInfoByReorderedIndex(targetIndex) ?: break
+            val targetCenter = targetInfo.offset + targetInfo.size / 2f
+            if (desiredCenter <= targetCenter) break
             val targetItem = reorderedItems[targetIndex]
             val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
             if (!canMoveToTarget) {
-                draggedItemOffset = threshold
                 break
             }
             moveItem(updatedIndex, targetIndex)
             updatedIndex += 1
-            draggedItemOffset -= currentItemSize
         }
-        while (draggedItemOffset < -threshold && updatedIndex > 0) {
+        while (updatedIndex > 0) {
             val targetIndex = updatedIndex - 1
+            val targetInfo = itemInfoByReorderedIndex(targetIndex) ?: break
+            val targetCenter = targetInfo.offset + targetInfo.size / 2f
+            if (desiredCenter >= targetCenter) break
             val targetItem = reorderedItems[targetIndex]
             val canMoveToTarget = isItemReorderable?.invoke(targetIndex, targetItem) ?: true
             if (!canMoveToTarget) {
-                draggedItemOffset = -threshold
                 break
             }
             moveItem(updatedIndex, targetIndex)
             updatedIndex -= 1
-            draggedItemOffset += currentItemSize
         }
         if (updatedIndex != currentIndex) {
             draggedIndex = updatedIndex
         }
+    }
+
+    fun calculateDraggedItemTranslation(index: Int): Float {
+        val currentDraggedIndex = draggedIndex ?: return 0f
+        if (currentDraggedIndex != index) return 0f
+        val pointerY = draggedPointerViewportY ?: return 0f
+        val grabOffsetY = draggedGrabOffsetY ?: return 0f
+
+        val firstReorderableListIndex = if (notSelectedItem != null) 1 else 0
+        val visibleItemsInfo = itemsListState.layoutInfo.visibleItemsInfo
+        val currentListIndex = currentDraggedIndex + firstReorderableListIndex
+        val currentItemInfo = visibleItemsInfo.firstOrNull { it.index == currentListIndex } ?: return 0f
+
+        val currentTop = currentItemInfo.offset.toFloat()
+        val currentSize = currentItemInfo.size.toFloat()
+        val currentCenter = currentTop + currentSize / 2f
+        var desiredCenter = (pointerY - grabOffsetY) + currentSize / 2f
+
+        if (currentDraggedIndex == 0) {
+            desiredCenter = maxOf(desiredCenter, currentCenter - currentSize / 2f)
+        } else {
+            val upperIndex = currentDraggedIndex - 1
+            val upperItem = reorderedItems[upperIndex]
+            val canMoveUp = isItemReorderable?.invoke(upperIndex, upperItem) ?: true
+            if (!canMoveUp) {
+                val upperInfo = visibleItemsInfo.firstOrNull {
+                    it.index == upperIndex + firstReorderableListIndex
+                }
+                if (upperInfo != null) {
+                    val upperCenter = upperInfo.offset + upperInfo.size / 2f
+                    desiredCenter = maxOf(desiredCenter, upperCenter)
+                }
+            }
+        }
+
+        if (currentDraggedIndex == reorderedItems.lastIndex) {
+            desiredCenter = minOf(desiredCenter, currentCenter + currentSize / 2f)
+        } else {
+            val lowerIndex = currentDraggedIndex + 1
+            val lowerItem = reorderedItems[lowerIndex]
+            val canMoveDown = isItemReorderable?.invoke(lowerIndex, lowerItem) ?: true
+            if (!canMoveDown) {
+                val lowerInfo = visibleItemsInfo.firstOrNull {
+                    it.index == lowerIndex + firstReorderableListIndex
+                }
+                if (lowerInfo != null) {
+                    val lowerCenter = lowerInfo.offset + lowerInfo.size / 2f
+                    desiredCenter = minOf(desiredCenter, lowerCenter)
+                }
+            }
+        }
+
+        val constrainedTop = desiredCenter - currentSize / 2f
+        return constrainedTop - currentTop
     }
 
     LaunchedEffect(draggedIndex, reorderEnabled, onItemsReordered, isItemReorderable) {
@@ -195,12 +252,7 @@ fun <T> BaseSelectorBottomSheet(
             }
 
             if (scrollDelta != 0f) {
-                val consumed = itemsListState.scrollBy(scrollDelta)
-                if (consumed != 0f) {
-                    draggedItemOffset += consumed
-                    consumeDragThresholds()
-                    dragOffsetAnchorY = dragPointerDeltaY - draggedItemOffset
-                }
+                itemsListState.scrollBy(scrollDelta)
             }
             delay(16)
         }
@@ -270,29 +322,15 @@ fun <T> BaseSelectorBottomSheet(
                                         }
 
                                         draggedIndex = touchedReorderedIndex
-                                        draggedItemOffset = 0f
-                                        dragPointerDeltaY = 0f
-                                        dragOffsetAnchorY = 0f
-                                        val viewportTop = layoutInfo.viewportStartOffset.toFloat()
-                                        val viewportBottom = layoutInfo.viewportEndOffset.toFloat()
-                                        val safeTop = viewportTop + autoScrollSafeInset
-                                        val safeBottom = viewportBottom - autoScrollSafeInset
-                                        draggedPointerViewportY = startOffset.y.coerceIn(safeTop, safeBottom)
+                                        draggedPointerViewportY = startOffset.y
+                                        draggedGrabOffsetY = startOffset.y - touchedItemInfo.offset
                                     },
                                     onDrag = { change, dragAmount ->
                                         if (draggedIndex == null) return@detectDragGesturesAfterLongPress
                                         change.consume()
-                                        dragPointerDeltaY += dragAmount.y
-                                        val layoutInfo = itemsListState.layoutInfo
-                                        val viewportTop = layoutInfo.viewportStartOffset.toFloat()
-                                        val viewportBottom = layoutInfo.viewportEndOffset.toFloat()
-                                        val safeTop = viewportTop + autoScrollSafeInset
-                                        val safeBottom = viewportBottom - autoScrollSafeInset
                                         val nextPointerY = (draggedPointerViewportY ?: change.position.y) + dragAmount.y
-                                        draggedPointerViewportY = nextPointerY.coerceIn(safeTop, safeBottom)
-                                        draggedItemOffset = dragPointerDeltaY - dragOffsetAnchorY
+                                        draggedPointerViewportY = nextPointerY
                                         consumeDragThresholds()
-                                        dragOffsetAnchorY = dragPointerDeltaY - draggedItemOffset
                                     },
                                     onDragEnd = { resetDragState() },
                                     onDragCancel = { resetDragState() },
@@ -316,7 +354,7 @@ fun <T> BaseSelectorBottomSheet(
                     val isDragged = draggedIndex == index
                     Box(
                         modifier = Modifier.graphicsLayer {
-                            translationY = if (isDragged) draggedItemOffset else 0f
+                            translationY = if (isDragged) calculateDraggedItemTranslation(index) else 0f
                             if (isDragged) {
                                 scaleX = 1.02f
                                 scaleY = 1.02f
